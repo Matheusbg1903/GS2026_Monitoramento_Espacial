@@ -20,6 +20,7 @@ gcc src/monitoramento.c -o monitoramento
 ```
 ./monitoramento
 ```
+
 ---
 
 ## O que o sistema faz
