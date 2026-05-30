@@ -1,9 +1,5 @@
 /*
  * ================================================================
- *  SERS - SISTEMA DE MONITORAMENTO ENERGETICO
- *  Missao Espacial Experimental | Global Solution 2026.1
- *  Ciencia da Computacao - FIAP
- * ================================================================
  *
  *  MODULOS MONITORADOS:
  *    - Paineis solares (geracao de energia renovavel)
@@ -13,15 +9,6 @@
  *    - Temperatura     (estabilidade termica)
  *    - Comunicacao     (status do link com a Terra)
  *
- *  ENTREGAVEIS ATENDIDOS:
- *    - Monitoramento de dados simulados
- *    - Geracao automatica de alertas
- *    - Tomada de decisao basica
- *    - Visualizacao organizada dos dados
- *    - Historico de leituras
- *    - Integracao com tema de energias renovaveis
- *
- *  REPOSITORIO: https://github.com/Matheusbg1903/GS2026_Monitoramento_Espacial
  * ================================================================
  */
 
@@ -30,7 +17,6 @@
 #include <string.h>
 #include <time.h>
 
-/* -- CORES ANSI ----------------------------------------------- */
 #define RESET    "\033[0m"
 #define VERM     "\033[1;31m"
 #define VERDE    "\033[1;32m"
@@ -40,35 +26,29 @@
 #define AZUL     "\033[1;34m"
 #define MAGENTA  "\033[1;35m"
 
-/* -- LIMITES OPERACIONAIS ------------------------------------- */
-#define TEMP_MAX          85.0   /* oC - superaquecimento critico       */
-#define TEMP_ALERTA       70.0   /* oC - alerta de temperatura elevada  */
-#define BATERIA_MIN       15.0   /* %  - nivel critico de bateria       */
-#define BATERIA_ALERTA    30.0   /* %  - alerta de bateria baixa        */
-#define PAINEL_MIN        20.0   /* %  - eficiencia minima do painel    */
-#define TURBINA_MIN       10.0   /* %  - potencia minima da turbina     */
-#define CONSUMO_MAX       90.0   /* %  - consumo maximo tolerado        */
-#define MAX_HISTORICO     10     /* quantidade maxima de leituras salvas */
+#define TEMP_MAX          85.0   
+#define TEMP_ALERTA       70.0   
+#define BATERIA_MIN       15.0   
+#define BATERIA_ALERTA    30.0   
+#define PAINEL_MIN        20.0   
+#define TURBINA_MIN       10.0   
+#define CONSUMO_MAX       90.0   
+#define MAX_HISTORICO     10     
 
-/* -- ESTRUTURA DE UMA LEITURA --------------------------------- */
 typedef struct {
-    float temperatura;      /* temperatura da nave em oC              */
-    float bateria;          /* nivel da bateria em %                  */
-    float painel_solar;     /* eficiencia dos paineis solares em %    */
-    float turbina;          /* potencia das turbinas em %             */
-    float consumo;          /* consumo energetico dos modulos em %    */
-    int   comunicacao;      /* 1 = ativa, 0 = falha                   */
-    int   valida;           /* 1 = leitura preenchida, 0 = vazia      */
+    float temperatura;      
+    float bateria;          
+    float painel_solar;     
+    float turbina;          
+    float consumo;          
+    int   comunicacao;      
+    int   valida;           
 } Leitura;
 
-/* -- VARIAVEIS GLOBAIS ---------------------------------------- */
 Leitura leituraAtual;
 Leitura historico[MAX_HISTORICO];
 int totalLeituras = 0;
 
-/* ================================================================
- *  FUNCOES AUXILIARES
- * ================================================================ */
 
 void limparTela() {
     #ifdef _WIN32
@@ -86,19 +66,18 @@ void imprimirCabecalho() {
     printf(CIANO "  ================================================\n\n" RESET);
 }
 
-/* Barra de progresso visual para valores em % */
 void barraProgresso(float valor, float limite_alerta, float limite_critico, int invertido) {
     int total = 20;
     int preenchido = (int)(valor / 100.0 * total);
     const char *cor;
 
     if (invertido) {
-        /* invertido: alto e ruim (temperatura, consumo) */
+        
         if (valor >= limite_critico)      cor = VERM;
         else if (valor >= limite_alerta)  cor = AMAR;
         else                              cor = VERDE;
     } else {
-        /* normal: baixo e ruim (bateria, paineis, turbina) */
+        
         if (valor <= limite_critico)      cor = VERM;
         else if (valor <= limite_alerta)  cor = AMAR;
         else                              cor = VERDE;
@@ -111,9 +90,6 @@ void barraProgresso(float valor, float limite_alerta, float limite_critico, int 
     printf("] %.1f%%" RESET, valor);
 }
 
-/* ================================================================
- *  OPCAO 1 - INSERIR DADOS MANUALMENTE
- * ================================================================ */
 void inserirDados() {
     limparTela();
     imprimirCabecalho();
@@ -147,7 +123,6 @@ void inserirDados() {
 
     leituraAtual.valida = 1;
 
-    /* Salva no historico circular */
     int pos = totalLeituras % MAX_HISTORICO;
     historico[pos] = leituraAtual;
     totalLeituras++;
@@ -155,9 +130,6 @@ void inserirDados() {
     printf(VERDE "\n  Dados inseridos com sucesso! Leitura #%d registrada.\n" RESET, totalLeituras);
 }
 
-/* ================================================================
- *  OPCAO 2 - SIMULACAO AUTOMATICA DE DADOS
- * ================================================================ */
 void simularDados() {
     limparTela();
     imprimirCabecalho();
@@ -166,7 +138,6 @@ void simularDados() {
 
     srand((unsigned int)time(NULL) + totalLeituras);
 
-    /* Simula variacoes realistas dos sensores */
     leituraAtual.temperatura  = 40.0 + (rand() % 600) / 10.0;  /* 40 a 100oC  */
     leituraAtual.bateria      = 10.0 + (rand() % 900) / 10.0;  /* 10 a 100%   */
     leituraAtual.painel_solar = 15.0 + (rand() % 860) / 10.0;  /* 15 a 100%   */
@@ -182,7 +153,6 @@ void simularDados() {
     printf("  Consumo       : %.1f%%\n",  leituraAtual.consumo);
     printf("  Comunicacao   : %s\n",      leituraAtual.comunicacao ? "ATIVA" : "FALHA");
 
-    /* Salva no historico */
     int pos = totalLeituras % MAX_HISTORICO;
     historico[pos] = leituraAtual;
     totalLeituras++;
@@ -190,9 +160,6 @@ void simularDados() {
     printf(VERDE "\n  Simulacao concluida! Leitura #%d registrada.\n" RESET, totalLeituras);
 }
 
-/* ================================================================
- *  OPCAO 3 - VISUALIZAR STATUS ATUAL
- * ================================================================ */
 void visualizarStatus() {
     limparTela();
     imprimirCabecalho();
@@ -208,32 +175,26 @@ void visualizarStatus() {
     printf("  |  MODULO              VALOR        STATUS         |\n");
     printf("  |-------------------------------------------------|\n");
 
-    /* Temperatura */
     printf("  |  Temperatura         ");
     barraProgresso(leituraAtual.temperatura, TEMP_ALERTA, TEMP_MAX, 1);
     printf("\n");
 
-    /* Bateria */
     printf("  |  Bateria             ");
     barraProgresso(leituraAtual.bateria, BATERIA_ALERTA, BATERIA_MIN, 0);
     printf("\n");
 
-    /* Painel Solar */
     printf("  |  Painel Solar        ");
     barraProgresso(leituraAtual.painel_solar, 40.0, PAINEL_MIN, 0);
     printf("\n");
 
-    /* Turbinas */
     printf("  |  Turbinas            ");
     barraProgresso(leituraAtual.turbina, 30.0, TURBINA_MIN, 0);
     printf("\n");
 
-    /* Consumo */
     printf("  |  Consumo             ");
     barraProgresso(leituraAtual.consumo, 70.0, CONSUMO_MAX, 1);
     printf("\n");
 
-    /* Comunicacao */
     printf("  |  Comunicacao         ");
     if (leituraAtual.comunicacao)
         printf(VERDE "LINK ESTABELECIDO" RESET);
@@ -243,7 +204,6 @@ void visualizarStatus() {
 
     printf("  -------------------------------------------------\n");
 
-    /* Balanco energetico */
     float geracao = (leituraAtual.painel_solar + leituraAtual.turbina) / 2.0;
     float balanco = geracao - leituraAtual.consumo;
     printf("\n  Geracao media (paineis + turbinas): %.1f%%\n", geracao);
@@ -253,9 +213,7 @@ void visualizarStatus() {
         printf(VERM "  Balanco energetico: %.1f%% (deficit)\n" RESET, balanco);
 }
 
-/* ================================================================
- *  OPCAO 4 - ANALISE COMPLETA E ALERTAS
- * ================================================================ */
+
 void executarAnalise() {
     limparTela();
     imprimirCabecalho();
@@ -269,7 +227,6 @@ void executarAnalise() {
     int alertas   = 0;
     int criticos  = 0;
 
-    /* -- Temperatura -- */
     if (leituraAtual.temperatura >= TEMP_MAX) {
         printf(VERM "  [CRITICO] SUPERAQUECIMENTO DETECTADO!\n"
                     "            Temp: %.1foC (limite: %.1foC)\n"
@@ -286,7 +243,6 @@ void executarAnalise() {
                leituraAtual.temperatura);
     }
 
-    /* -- Bateria -- */
     if (leituraAtual.bateria <= BATERIA_MIN) {
         printf(VERM "  [CRITICO] BATERIA EM NIVEL CRITICO!\n"
                     "            Carga: %.1f%% (minimo: %.1f%%)\n"
@@ -302,7 +258,6 @@ void executarAnalise() {
         printf(VERDE "  [OK]      Bateria: %.1f%%\n\n" RESET, leituraAtual.bateria);
     }
 
-    /* -- Painel Solar -- */
     if (leituraAtual.painel_solar <= PAINEL_MIN) {
         printf(VERM "  [CRITICO] PAINEIS SOLARES COM FALHA!\n"
                     "            Eficiencia: %.1f%% (minimo: %.1f%%)\n"
@@ -319,7 +274,6 @@ void executarAnalise() {
                leituraAtual.painel_solar);
     }
 
-    /* -- Turbinas -- */
     if (leituraAtual.turbina <= TURBINA_MIN) {
         printf(VERM "  [CRITICO] TURBINAS COM FALHA OPERACIONAL!\n"
                     "            Potencia: %.1f%% (minimo: %.1f%%)\n"
@@ -351,7 +305,6 @@ void executarAnalise() {
         printf(VERDE "  [OK]      Consumo: %.1f%%\n\n" RESET, leituraAtual.consumo);
     }
 
-    /* -- Comunicacao -- */
     if (!leituraAtual.comunicacao) {
         printf(VERM "  [CRITICO] FALHA DE COMUNICACAO COM A TERRA!\n"
                     "            > Reiniciar modulo de comunicacao.\n"
@@ -361,7 +314,6 @@ void executarAnalise() {
         printf(VERDE "  [OK]      Comunicacao estabelecida.\n\n" RESET);
     }
 
-    /* -- Resultado geral -- */
     printf("  ==================================================\n");
     if (criticos == 0 && alertas == 0) {
         printf(VERDE "  MISSAO: OPERANDO NORMALMENTE\n"
@@ -376,9 +328,7 @@ void executarAnalise() {
     printf("  ==================================================\n");
 }
 
-/* ================================================================
- *  OPCAO 5 - HISTORICO DE LEITURAS
- * ================================================================ */
+
 void verHistorico() {
     limparTela();
     imprimirCabecalho();
@@ -420,9 +370,7 @@ void verHistorico() {
     printf("\n  Total de leituras realizadas: %d\n", totalLeituras);
 }
 
-/* ================================================================
- *  FUNCAO PRINCIPAL
- * ================================================================ */
+
 int main() {
     int opcao;
 
